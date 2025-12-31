@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 import { MapPin, Search, Filter, Star, Clock, DollarSign } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import StadiumCard from "./StadiumCard";
+
+// Fix Leaflet default icon issue with webpack/vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 interface Stadium {
   id: string;
@@ -12,6 +22,8 @@ interface Stadium {
   price_per_hour: number;
   rating: number;
   images: string[];
+  latitude?: number;
+  longitude?: number;
 }
 
 const MapView = () => {
@@ -49,16 +61,43 @@ const MapView = () => {
     <div className="h-full flex gap-6">
       {/* Map Area */}
       <div className="flex-1 relative rounded-2xl overflow-hidden border border-white/10">
-        {/* Placeholder Map */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/20 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin size={64} className="text-primary mx-auto mb-4 animate-bounce-subtle" />
-            <h3 className="text-xl font-semibold mb-2">Interactive Map</h3>
-            <p className="text-muted-foreground max-w-md">
-              Add your Mapbox token to enable the interactive stadium map
-            </p>
-          </div>
-        </div>
+        {/* Real Map */}
+        <MapContainer
+          center={[36.7538, 3.0588]} // Algiers, Algeria
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          className="z-0"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {filteredStadiums.map((stadium) => (
+            stadium.latitude && stadium.longitude && (
+              <Marker
+                key={stadium.id}
+                position={[stadium.latitude, stadium.longitude]}
+                eventHandlers={{
+                  click: () => setSelectedStadium(stadium),
+                }}
+              >
+                <Popup>
+                  <div className="p-2">
+                    <h4 className="font-semibold text-sm mb-1">{stadium.name}</h4>
+                    <p className="text-xs text-muted-foreground mb-1">{stadium.location}</p>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-medium">{stadium.price_per_hour} DZD/hr</span>
+                      <span className="flex items-center gap-1">
+                        <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                        {stadium.rating}
+                      </span>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            )
+          ))}
+        </MapContainer>
 
         {/* Search Overlay */}
         <div className="absolute top-4 left-4 right-4 z-10">
