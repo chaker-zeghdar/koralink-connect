@@ -1,4 +1,5 @@
 import { MapPin, Users, Calendar, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   const stats = [
@@ -6,7 +7,6 @@ const HeroSection = () => {
     { icon: Users, value: "2K+", label: "Players" },
     { icon: Calendar, value: "500+", label: "Matches" },
   ];
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background Effects */}
@@ -45,19 +45,19 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-slide-up opacity-0" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
-            <button className="btn-hero-primary group">
+            <Link to="/auth?role=player" className="btn-hero-primary group">
               <span className="relative z-10 flex items-center gap-2">
                 <Users size={20} />
                 Join as Player
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-glow opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-            </button>
-            <button className="btn-hero-secondary">
+            </Link>
+            <Link to="/auth?role=stadium_owner" className="btn-hero-secondary">
               <span className="flex items-center gap-2">
                 <MapPin size={20} />
                 Register Stadium
               </span>
-            </button>
+            </Link>
           </div>
 
           {/* Stats */}
